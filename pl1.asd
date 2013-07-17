@@ -7,7 +7,17 @@
   :license "Specify license here"
   :depends-on (
                #:utils
+               #:iterate
+               #:cl-ppcre
+               #:fiveam
 	       )
   :components ((:file "package")
-               (:file "pl1")))
+               (:file "pl1")
+               (:module "tests"
+                        :components (
+                                     (:file "pl1")
+                                     )
+                        )
+               )
+  )
 
