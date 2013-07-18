@@ -12,6 +12,7 @@
                #:fiveam
 	       )
   :components ((:file "package")
+               (:file "classes")
                (:file "pl1")
                (:module "tests"
                         :components (
