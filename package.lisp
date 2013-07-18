@@ -9,6 +9,7 @@
   (:export #:children
            #:make-program
            #:symbol-table
+           #:definition
            #:source
            #:statements
            )

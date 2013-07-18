@@ -5,6 +5,7 @@
 (defparameter pkg (symbol-package :keyword))
 
 (defvar current-block)
+(defvar block-number)
 
 (defclass blk ()
   ((level :accessor nesting :initarg :level)
@@ -12,6 +13,7 @@
    (symtab :accessor symbol-table :initform (make-hash-table :test 'eq))
    (parent :accessor parent)
    (definition :accessor definition :initform nil :initarg :definition)
+   (num :accessor block-number :initarg :number)
    )
   )
 
@@ -105,8 +107,9 @@
 
 (defmethod initialize-instance ((self procedure) &key)
   (call-next-method)
+  (incf block-number)
   (let ((proc (make-instance 'procedure-block :level (1+ (level self))
-                             :definition self))
+                             :definition self :number block-number))
         )
     (setf (children current-block) (push proc (children current-block)))
     (setf (parent proc) current-block)
@@ -222,9 +225,10 @@
   )
 
 (defmethod make-program ((source string))
-  (let ((prog (make-instance 'program :source source))
-        )
-    (setf current-block prog)
+  (let* ((block-number 0)
+         (prog (make-instance 'program :source source :number block-number))
+         (current-block prog)
+         )
     (parse prog)
     )
   )

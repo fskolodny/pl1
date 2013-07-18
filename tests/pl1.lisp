@@ -13,7 +13,7 @@
     (is (= 2 (length (statements program))))
     (let ((procs (children program)))
       (is (= 1 (length procs)))
-      (is-true (gethash :p (symbol-table program)))
+      (is (eq (definition (elt procs 0)) (gethash :p (symbol-table program))))
       )
     )
   )
