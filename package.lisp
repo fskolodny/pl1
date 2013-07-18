@@ -6,9 +6,9 @@
         #:iter
         #:cl-ppcre
         )
-  (:export #:external-procedures
+  (:export #:children
            #:make-program
-           #:external-name-table
+           #:symbol-table
            #:source
            #:statements
            )
