@@ -4,10 +4,14 @@
 
 (defparameter pkg (symbol-package :keyword))
 
+(defun assignmentp (tokens)
+  (and (> (length tokens) 2)
+       (equal '(:char . #\=) (elt tokens 1))
+       )
+  )
+
 (defun classify-statement (tokens)
-  (if (and (> (length tokens) 1)
-           (eq :id (car (elt tokens 0)))
-           (eq :char (car (elt tokens 1))))
+  (if (assignmentp tokens)
       'assignment
       (case (cdr (elt tokens 0))
         ((:procedure) 'procedure)
@@ -23,7 +27,7 @@
         )
     (iter
      (for start on tokens by #'cddr)
-     (while (and (eq :id (caar start)) (equal (cons :char #\:) (cadr start))))
+     (while (and (eq :id (caar start)) (equal '(:char . #\:) (cadr start))))
      (collect (cdar start) into labels)
      (finally
       (setf statement-type (classify-statement start))

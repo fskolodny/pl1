@@ -21,8 +21,8 @@
   (let* ((program (make-program "p:proc; a = 1.3; end;"))
          (assignment (elt (statements program) 1))
           )
-    (is (equal (cons :number 1.3) (rhs assignment)))
-    (is (equal (cons :id :a) (lhs assignment)))
+    (is (equal '(:number . 1.3) (rhs assignment)))
+    (is (equal '(:id . :a) (lhs assignment)))
     )
   )
 

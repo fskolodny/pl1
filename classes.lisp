@@ -118,7 +118,7 @@
         )
     (setf (lhs self) (var)
           )
-    (if (equal (cons :char #\=) (car current-token))
+    (if (equal '(:char . #\=) (car current-token))
         (progn
           (setf current-token (cdr current-token))
           (setf (rhs self) (expression))
@@ -138,7 +138,7 @@
         )
     (iter
       (for token in tokens)
-      (if (and (eq (car token) :char) (char= #\; (cdr token)))
+      (if (equal token '(:char . #\;))
           (let ((stmt (make-statement (reverse current-statement) :level level :nesting nesting))
                 )
             (setf statements (push stmt statements)
