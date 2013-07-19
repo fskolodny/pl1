@@ -6,7 +6,7 @@
 
 (defun assignmentp (tokens)
   (and (> (length tokens) 2)
-       (equal '(:char . #\=) (elt tokens 1))
+       (equal '(:token . #\=) (elt tokens 1))
        )
   )
 
@@ -27,7 +27,7 @@
         )
     (iter
      (for start on tokens by #'cddr)
-     (while (and (eq :id (caar start)) (equal '(:char . #\:) (cadr start))))
+     (while (and (eq :id (caar start)) (equal '(:token . #\:) (cadr start))))
      (collect (cdar start) into labels)
      (finally
       (setf statement-type (classify-statement start))
@@ -47,26 +47,30 @@
       )
   )
 (defparameter tokeniser (create-scanner
-                         "(('([^']('')?)*')|([-+]?\\d+([.]\\d*)?)|(\\w[\\w\\d_]*)|(\\s+)|(.))"
+                         "(('([^']('')?)*')|([-+]?\\d+([.]\\d*)?)|(\\w[\\w\\d_]*)|(\\s+)|((!=)|(>=)|(<=)|(->)|.))"
                          :multi-line-mode t :extended-mode t))
+(defparameter comments-re (create-scanner "\/[*][^*]*([*][^/])*[*]\/"))
+
+(defun remove-comments (string)
+  (regex-replace-all comments-re string " ")
+  )
 (defun tokenise (string)
-  (let* ((str (regex-replace-all "\/[*][^*]*([*][^/])*[*]\/" string " "))
-         (result (make-list 0))
+  (let* ((result (make-list 0))
          )
-    (do-scans (match-start match-end reg-starts reg-ends tokeniser str)
+    (do-scans (match-start match-end reg-starts reg-ends tokeniser string)
       (if (null (elt reg-starts 7))
           (setf result
                 (push
                  (if (elt reg-starts 1)
                      (cons :string
                            (regex-replace-all "''"
-                                              (subseq str
+                                              (subseq string
                                                       (1+ match-start)
                                                       (1- match-end))
                                               "'"))
                      (if (elt reg-starts 4)
                          (multiple-value-bind (num complete)
-                             (read-from-string (subseq str match-start
+                             (read-from-string (subseq string match-start
                                                        match-end)
                                                :preserve-whitespace t)
                            (unless (< complete (- match-end match-start))
@@ -76,11 +80,16 @@
                          (if (elt reg-starts 6)
                              (cons :id (fix-abbreviations
                                         (intern
-                                         (string-upcase (subseq str
+                                         (string-upcase (subseq string
                                                                 match-start
                                                                 match-end))
                                          pkg)))
-                             (cons :char (elt str match-start))
+                             (cons :token
+                                   (if (= 1 (- match-end match-start))
+                                       (elt string match-start)
+                                       (intern (subseq string match-start
+                                                       match-end)
+                                               pkg)))
                              )
                          )
                      )

@@ -118,7 +118,7 @@
         )
     (setf (lhs self) (var)
           )
-    (if (equal '(:char . #\=) (car current-token))
+    (if (equal '(:token . #\=) (car current-token))
         (progn
           (setf current-token (cdr current-token))
           (setf (rhs self) (expression))
@@ -130,7 +130,7 @@
   )
 
 (defmethod parse ((self program))
-  (let ((tokens (tokenise (source self)))
+  (let ((tokens (tokenise (remove-comments (source self))))
         (current-statement (make-list 0))
         (statements (make-list 0))
         (nesting 0)
@@ -138,7 +138,7 @@
         )
     (iter
       (for token in tokens)
-      (if (equal token '(:char . #\;))
+      (if (equal token '(:token . #\;))
           (let ((stmt (make-statement (reverse current-statement) :level level :nesting nesting))
                 )
             (setf statements (push stmt statements)
