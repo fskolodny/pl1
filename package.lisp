@@ -10,6 +10,8 @@
            #:make-program
            #:symbol-table
            #:definition
+           #:rhs
+           #:lhs
            #:source
            #:statements
            )

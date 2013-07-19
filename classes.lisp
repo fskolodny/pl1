@@ -6,6 +6,7 @@
 
 (defvar current-block)
 (defvar block-number)
+(defvar current-token)
 
 (defclass blk ()
   ((level :accessor nesting :initarg :level)
@@ -88,6 +89,9 @@
 (defmethod update-nesting ((self assignment)) (nesting self))
 (defmethod update-level ((self assignment)) (level self))
 
+(defmethod update-nesting ((self statement)) (nesting self))
+(defmethod update-level ((self statement)) (level self))
+
 (defmethod update-nesting ((self end))
   (let ((nesting (nesting self))
         )
@@ -105,6 +109,25 @@
 (defmethod update-level ((self procedure)) (1+ (level self))
   )
 (defmethod update-nesting ((self procedure)) (nesting self))
+
+(defmethod parse ((self statement))
+  )
+
+(defmethod parse ((self assignment))
+  (let ((current-token (tokens self))
+        )
+    (setf (lhs self) (var)
+          )
+    (if (equal (cons :char #\=) (car current-token))
+        (progn
+          (setf current-token (cdr current-token))
+          (setf (rhs self) (expression))
+          )
+        (error "Invalid assignment statement ~a current-token ~a"
+               (tokens self) current-token)
+        )
+    )
+  )
 
 (defmethod parse ((self program))
   (let ((tokens (tokenise (source self)))
@@ -139,6 +162,11 @@
           )
   )
 
+(defmethod print-object ((self assignment) stream)
+  (call-next-method)
+  (format stream "~a = ~a" (lhs self) (rhs self))
+  )
+
 (defmethod print-object ((self program) stream)
   (format stream "~%~s~%~{~s~}" (source self) (statements self))
   )
@@ -149,5 +177,41 @@
          (current-block prog)
          )
     (parse prog)
+    )
+  )
+
+(defun var ()
+  (id)
+  )
+
+(defun id ()
+  (let ((curr (car current-token))
+        (next (cdr current-token))
+        )
+    (if (eq (car curr) :id)
+        (progn
+          (setf current-token next)
+          curr
+          )
+        nil
+        )
+    )
+  )
+
+(defun expression ()
+  (or (var) (num))
+  )
+
+(defun num ()
+  (let ((curr (car current-token))
+        (next (cdr current-token))
+        )
+    (if (eq :number (car curr))
+        (progn
+          (setf current-token next)
+          curr
+          )
+        nil
+        )
     )
   )
